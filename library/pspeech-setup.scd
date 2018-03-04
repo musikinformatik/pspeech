@@ -43,6 +43,9 @@ Ndef(\shiftRatio, (-200 / 100).midiratio);
 Ndef(\auditionAmp, 0.6);
 Ndef(\onoff_in, 1);
 
+// predelay pitchshift:
+Ndef(\shiftPreDelay, 0);
+
 
 // f0 - Analyse (unsicher!)
 
@@ -65,7 +68,9 @@ Ndef(\graceTimeF0, 1.3);
 		"maximal time between ps-events", Ndef(\trigDistanceMax).source,
 		"pitch shift duration", Ndef(\shiftDur).source,
 		"pitch shift interval (cent)", Ndef(\shiftRatio, (-200 / 100).midiratio).source.ratiomidi.round(0.0001) * 100,
-		"audition amplitude", Ndef(\auditionAmp).source
+		"pitchshift predelay", Ndef(\shiftPreDelay).source,
+		"audition amplitude", Ndef(\auditionAmp).source,
+
 	]
 
 };
@@ -211,9 +216,12 @@ Ndef(\pitchShiftRunning, {
 
 Ndef(\pitchShiftAudible, {
 	var onoff = Ndef.kr(\pitchShiftRunning, 1);
-	onoff = DelayL.kr(onoff, 0.01, 0.01); // delay just a little bit, so that pitchshift is already active
-	onoff  = onoff.lag(0.001); //  1 ms exponential smoothing (one pole with 1ms for 60 dB) for audio crossfade
+	// delay just a little bit, so that pitchshift is already active
+	onoff = DelayL.kr(onoff, 0.1, Ndef.kr(\shiftPreDelay, 1));
+	onoff  = onoff.lagud(0, 0.1); // 100 ms soft fading out pitch shift
+	onoff
 });
+
 
 
 Ndef(\pitchShiftedByDelay, {
@@ -229,12 +237,12 @@ Ndef(\pitchShiftedByDelay, {
 
 	var diff = HPZ1.kr(onoff);
 	var trigOn = diff > 0;
-	var offDelay = 0.3;
+	var offDelay = 0.2;
 	var trigOff = DelayN.kr(diff < 0, offDelay, offDelay);
 	var trig = trigOn + trigOff;
 
 	//trigOn.poll(trigOn, "trigOn");
-	//trigOff.poll(trigOff, "trigOff");
+	//offDelay.poll(trigOff, "trigOff");
 
 	RecordBuf.ar(in, buf, BufFrames.kr(buf), run: -1.0, trigger: trig);
 
@@ -272,10 +280,12 @@ Ndef(\pitchShiftMethod, { Ndef.ar(\pitchShiftedByDelay, 1) });
 
 ~auditionFunction = {
 	var onoff = Ndef.kr(\pitchShiftAudible, 1);
-	SelectX.ar(onoff, [
+	var sig = SelectX.ar(onoff, [
 		Ndef.ar(\input, 1),
 		Ndef.ar(\pitchShiftMethod, 1)
-	])
+	]);
+	CheckBadValues.ar(sig, post:2);
+	sig
 };
 
 ~auditionTestFunction = {
@@ -283,6 +293,7 @@ Ndef(\pitchShiftMethod, { Ndef.ar(\pitchShiftedByDelay, 1) });
 };
 
 Ndef(\audition, ~auditionFunction).playN([0, 1]);
+//Ndef(\audition, { Ndef.ar(\input, 1) }).playN([0, 1]);
 
 // write pitch shift signal to extra channel, convert to audio rate
 
