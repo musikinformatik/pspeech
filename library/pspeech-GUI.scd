@@ -3,7 +3,10 @@
 var w, a, u, text, updateInfo, pbut, rbut, resetBut, dbview, postbut, viewsToReset;
 var infoVoice, infoF0, infoPitchShift;
 var inputLevel, outputLevel, pitchShiftLevel;
+
+
 w = Window("Parkinson und Sprache", Rect(100, 100, 640, 400), resizable:false);
+if(~window.notNil) { ~window.close }; ~window = w;
 
 w.view.keyDownAction = { |v, key, mod|
 	if(mod.isShift) {
