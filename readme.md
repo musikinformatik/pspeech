@@ -1,4 +1,8 @@
 
+# Parkinson and Speech
+
+System for a clinical neurological experiment that investigates the Parkinson disease.
+It is a cooperation of the Institute for Clinical Neurology of the Heinrich-Heine-Universität Düsseldorf.
 
 ## Recent Changes 0.1.1
 
