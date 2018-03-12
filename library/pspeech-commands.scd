@@ -4,6 +4,7 @@
 ~filePrefix = "pspeech";
 ~recPath = Platform.recordingsDir;
 
+
 if(pathMatch(~recPath +/+ "*").isEmpty) {
 	"nonexisting Platform.recordingsDir: creating directory %".format(~recPath).postln;
 	unixCmd("mkdir '%'".format(~recPath))
@@ -22,6 +23,8 @@ if(pathMatch(~recPath +/+ "*").isEmpty) {
 
 	s.options.recSampleFormat = "int16";
 
+	~auditionPath = nil;
+
 	//s.reboot;
 
 	s.waitForBoot {
@@ -38,8 +41,12 @@ if(pathMatch(~recPath +/+ "*").isEmpty) {
 	~recorders = { Recorder(Server.default) }.dup(3);
 	~recorders.do { |x, i|
 		var path = (pathHead ++ "_" ++ labels[i] ++ ".aiff").postln;
+		if(i == 1) {
+			~auditionPath = path; // this is the file of the shift
+		};
 		x.prepareForRecord(path: path, numChannels:1)
 	};
+
 	~writeParameterFile.(pathHead ++ "_" ++ timestamp ++ "__parameters.csv");
 
 };
@@ -87,7 +94,14 @@ if(pathMatch(~recPath +/+ "*").isEmpty) {
 
 ~stopRecording = {
 	~recorders.do(_.stopRecording);
+};
 
+~preparePlayback = { |action|
+	if(~auditionPath.notNil) {
+		~auditionPlaybackBuffer = Buffer.read(s, ~auditionPath, action: action)
+	} {
+		"preparePlayback: no soundfile to playback".warn;
+	}
 };
 
 

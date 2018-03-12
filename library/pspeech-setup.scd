@@ -307,6 +307,10 @@ Ndef(\pitchShiftMethod, { Ndef.ar(\pitchShiftedByDelay, 1) });
 	WhiteNoise.ar(0.1)
 };
 
+~auditionPlaybackFunction = {
+	PlayBuf.ar(1, ~auditionPlaybackBuffer, rate: 1, loop:0)
+};
+
 Ndef(\audition, ~auditionFunction).playN([0, 1]);
 //Ndef(\audition, { Ndef.ar(\input, 1) }).playN([0, 1]);
 

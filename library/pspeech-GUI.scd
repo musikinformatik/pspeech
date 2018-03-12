@@ -42,13 +42,45 @@ pbut = Button(w, Rect(20, 100, 70, 50))
 	if(b.value == 0) { Ndef(\onoff_in, 1) } { Ndef(\onoff_in, 0) }
 });
 
-a = Button(w, Rect(20, 250, 70, 50)).states_([["test\noutput"], ["stop\ntest", Color.black, Color.yellow]]).action_({ |b|
+
+/*
+
+Testing
+
+*/
+
+a = Button(w, Rect(20, 250, 70, 50))
+.states_([
+	["test\noutput"],
+	["stop\ntest", Color.black, Color.yellow]
+])
+.action_({ |b|
 	if(b.value == 1) {
 		Ndef(\audition, ~auditionTestFunction)
 	} {
 		Ndef(\audition, ~auditionFunction)
 	}
 });
+
+viewsToReset = viewsToReset.add(a);
+
+
+a = Button(w, Rect(300, 250, 70, 50))
+.states_([
+	["start\nplayback"],
+	["stop\nplayback", Color.black, Color.yellow]
+])
+.action_({ |b|
+	if(b.value == 1) {
+		~preparePlayback.value {
+			Ndef(\audition, ~auditionPlaybackFunction)
+		};
+	} {
+		Ndef(\audition, ~auditionFunction)
+	}
+});
+
+
 viewsToReset = viewsToReset.add(a);
 
 
