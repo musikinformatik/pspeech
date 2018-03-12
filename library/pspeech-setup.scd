@@ -22,8 +22,11 @@ Parameter
 // Schwellwert für Analysebeginn
 Ndef(\ampThresh, 0.05);
 
-// Verzögerung vor erstem ps-Trigger (in sec)
-Ndef(\trigDelay, 1);
+// Maximale Verzögerung vor erstem ps-Trigger (in sec)
+Ndef(\trigOnsetDelayMax, 1.0);
+
+// Minimale Verzögerung vor erstem ps-Trigger (in sec)
+Ndef(\trigOnsetDelayMin, 0.5);
 
 // Minimale Zeit zwischen ps-Triggern (in sec)
 Ndef(\trigDistanceMin, 700/1000);
@@ -63,7 +66,8 @@ Ndef(\graceTimeF0, 1.3);
 	[
 		"TTL latency", ~ttlLatency,
 		"amplitude theshold", Ndef(\ampThresh).source,
-		"minimal time before ps-onset", Ndef(\trigDelay).source,
+		"minimal time before ps-onset", Ndef(\trigOnsetDelayMin).source,
+		"maximal time before ps-onset", Ndef(\trigOnsetDelayMax).source,
 		"minimal time between ps-events", Ndef(\trigDistanceMin).source,
 		"maximal time between ps-events", Ndef(\trigDistanceMax).source,
 		"pitch shift duration", Ndef(\shiftDur).source,
@@ -178,8 +182,9 @@ Ndef(\triggersHappen, { Ndef.kr(\hasFreq, 1) });
 
 // Pitch Shift
 
+
 Ndef(\pitchShiftRunning, {
-	var triggersHappen, triggerPossible, trigDelayMask;
+	var triggersHappen, triggerPossible, trigOnsetDelayMask, trigOnsetDelay;
 	var output, prevOutput, randTrig;
 	var timeSincePrevTriggerOff, delayTime;
 
@@ -189,11 +194,21 @@ Ndef(\pitchShiftRunning, {
 	// triggers only happen when a frequency has been detected and input is running.
 	triggersHappen = Ndef.kr(\triggersHappen, 1);
 
+	// randomise between minimum and maximum trig onset delay time
+	trigOnsetDelay = Latch.kr(
+		TRand.kr(
+			Ndef.kr(\trigOnsetDelayMin, 1),
+			Ndef.kr(\trigOnsetDelayMax, 1),
+			triggersHappen
+		),
+		triggersHappen
+	);
+
 	// and this only after a certain time
-	trigDelayMask = Sweep.kr(triggersHappen) > Ndef.kr(\trigDelay, 1);
+	trigOnsetDelayMask = Sweep.kr(triggersHappen) > trigOnsetDelay;
 
 	// goes to 1 when triggers are possible, else 0
-	triggerPossible =  HPZ1.kr(triggersHappen * trigDelayMask * (1 - prevOutput)) > 0;
+	triggerPossible =  HPZ1.kr(triggersHappen * trigOnsetDelayMask * (1 - prevOutput)) > 0;
 
 	// when triggers are possible, calculate random delaytime
 	delayTime = TRand.kr(Ndef.kr(\trigDistanceMin, 1), Ndef.kr(\trigDistanceMax, 1), triggerPossible);
