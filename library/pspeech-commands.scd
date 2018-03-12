@@ -1,6 +1,13 @@
+~pspeechVersion = "0.1.1";
 
 ~path = "pspeech-setup.scd".resolveRelative;
+~filePrefix = "pspeech";
+~recPath = Platform.recordingsDir;
 
+if(pathMatch(~recPath +/+ "*").isEmpty) {
+	"nonexisting Platform.recordingsDir: creating directory %".format(~recPath).postln;
+	unixCmd("mkdir '%'".format(~recPath))
+};
 
 ~reset = {
 
@@ -26,19 +33,21 @@
 ~prepareRecording = {
 	var timestamp = Date.localtime.stamp;
 	var labels = ["input", "output", "trigger"];
+	var pathHead = ~recPath +/+ ~filePrefix ++ "_" ++ timestamp;
+
 	~recorders = { Recorder(Server.default) }.dup(3);
 	~recorders.do { |x, i|
-		var path = (~recPath ++ "_" ++ timestamp ++ "_" ++ labels[i] ++ ".aiff").postln;
+		var path = (pathHead ++ "_" ++ labels[i] ++ ".aiff").postln;
 		x.prepareForRecord(path: path, numChannels:1)
 	};
-	~writeParameterFile.(~recPath ++ "_" ++ timestamp ++ "__parameters.csv");
+	~writeParameterFile.(pathHead ++ "_" ++ timestamp ++ "__parameters.csv");
 
 };
 
 ~writeParameterFile = { |path|
 	var params = ~getParameters.value;
 	var timestamp = Date.localtime.asString;
-	var string = "pspeech version 0.1. Date of Recording:" + timestamp ++ "\n";
+	var string = "pspeech version %. Date of Recording: %\n".format(~pspeechVersion, timestamp);
 	string = string ++ "filename, " ++ path.basename.cs ++ "\n";
 	params.pairsDo { |key, val| string = string ++ key ++ ", " ++ val ++ "\n" };
 	"\n------------------------".postln;
@@ -46,8 +55,6 @@
 	"------------------------\n".postln;
 	File.use(path, "w", { |file| file << string });
 };
-
-~recPath = Platform.recordingsDir +/+ "pspeech";
 
 
 ~startRecording = { |path|
