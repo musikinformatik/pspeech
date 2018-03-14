@@ -358,7 +358,7 @@ Ndef(\analysisPitchOSC, {
 });
 
 Ndef(\pitchShiftOSC, {
-	var shiftGate = Ndef.kr(\pitchShiftRunning, 1) * EnvGen.kr(Env([0, 0, 1], [0.1, 0]));
+	var shiftGate = Ndef.kr(\pitchShiftAudible, 1) * EnvGen.kr(Env([0, 0, 1], [0.1, 0]));
 	SendReply.kr(shiftGate, "/ps_start", Ndef.kr(\time, 1));
 	SendReply.kr(1 - shiftGate * Line.kr(0, 1, 0.1), "/ps_stop", Ndef.kr(\time, 1));
 });
