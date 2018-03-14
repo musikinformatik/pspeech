@@ -72,11 +72,9 @@ a = Button(w, Rect(300, 250, 70, 50))
 ])
 .action_({ |b|
 	if(b.value == 1) {
-		~preparePlayback.value {
-			Ndef(\audition, ~auditionPlaybackFunction)
-		};
+		~runPlayback.value
 	} {
-		Ndef(\audition, ~auditionFunction)
+		~stopPlayback.value
 	}
 });
 

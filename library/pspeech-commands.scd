@@ -23,7 +23,7 @@ if(pathMatch(~recPath +/+ "*").isEmpty) {
 
 	s.options.recSampleFormat = "int16";
 
-	~auditionPath = nil;
+	~auditionPaths = nil;
 
 	//s.reboot;
 
@@ -38,13 +38,13 @@ if(pathMatch(~recPath +/+ "*").isEmpty) {
 	var labels = ["input", "output", "trigger"];
 	var pathHead = ~recPath +/+ ~filePrefix ++ "_" ++ timestamp;
 
+	~freePlaybackBuffers.value;
+
 	~recorders = { Recorder(Server.default) }.dup(3);
-	~recorders.do { |x, i|
+	~auditionPaths = ~recorders.collect { |x, i|
 		var path = (pathHead ++ "_" ++ labels[i] ++ ".aiff").postln;
-		if(i == 1) {
-			~auditionPath = path; // this is the file of the shift
-		};
-		x.prepareForRecord(path: path, numChannels:1)
+		x.prepareForRecord(path: path, numChannels:1);
+		path
 	};
 
 	~writeParameterFile.(pathHead ++ "_" ++ timestamp ++ "__parameters.csv");
@@ -96,12 +96,42 @@ if(pathMatch(~recPath +/+ "*").isEmpty) {
 	~recorders.do(_.stopRecording);
 };
 
+
+~runPlayback = {
+	fork {
+		~preparePlayback.value;
+		s.sync;
+		~startPlayback.value
+	}
+};
+
+
 ~preparePlayback = { |action|
-	if(~auditionPath.notNil) {
-		~auditionPlaybackBuffer = Buffer.read(s, ~auditionPath, action: action)
+	if(~auditionPaths.notNil) {
+		~auditionPlaybackBuffer = Buffer.read(s, ~auditionPaths[1]);
+		~pitchShiftPlaybackBuffer = Buffer.read(s, ~auditionPaths[2]);
 	} {
 		"preparePlayback: no soundfile to playback".warn;
 	}
+};
+
+~startPlayback = {
+	s.bind {
+		Ndef(\audition, ~auditionPlaybackFunction);
+		Ndef(\pitchShiftAudible, ~pitchShiftPlaybackGateFunction);
+	}
+};
+
+~stopPlayback = {
+	s.bind {
+		Ndef(\audition, ~auditionFunction);
+		Ndef(\pitchShiftAudible, ~pitchShiftGateFunction);
+	}
+};
+
+~freePlaybackBuffers = {
+	~auditionPlaybackBuffer.free;
+	~pitchShiftPlaybackBuffer.free;
 };
 
 

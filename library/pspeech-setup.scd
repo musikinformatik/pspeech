@@ -229,13 +229,19 @@ Ndef(\pitchShiftRunning, {
 });
 
 
-Ndef(\pitchShiftAudible, {
+~pitchShiftGateFunction = {
 	var onoff = Ndef.kr(\pitchShiftRunning, 1);
 	// delay just a little bit, so that pitchshift is already active
 	onoff = DelayL.kr(onoff, 0.1, Ndef.kr(\shiftPreDelay, 1));
 	onoff  = onoff.lagud(0, 0.1); // 100 ms soft fading out pitch shift
 	onoff
-});
+};
+
+~pitchShiftPlaybackGateFunction = {
+	PlayBuf.ar(1, ~pitchShiftPlaybackBuffer, rate: 1, loop:0)
+};
+
+Ndef(\pitchShiftAudible, ~pitchShiftGateFunction);
 
 
 
