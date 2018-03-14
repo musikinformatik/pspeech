@@ -144,11 +144,6 @@ OSCdef(\g6, { |msg|
 }, '/ps_stop');
 
 
-Slider(w, Rect(100, 210, 150, 30))
-.value_(Ndef(\auditionAmp).source.explin(0.1, 10, 0, 1))
-.action_({ |sl| Ndef(\auditionAmp, sl.value.linexp(0, 1, 0.1, 10)) });
-
-
 a = PopUpMenu(w, Rect(100, 170, 150, 30)).items_(["warte auf f0", "warte auf input"]).action_({ |v|
 	if(v.value == 0) {
 		Ndef(\triggersHappen, { Ndef.kr(\hasFreq, 1) });
