@@ -238,7 +238,7 @@ Ndef(\pitchShiftRunning, {
 };
 
 ~pitchShiftPlaybackGateFunction = {
-	PlayBuf.ar(1, ~pitchShiftPlaybackBuffer, rate: 1, loop:0)
+	A2K.kr(PlayBuf.ar(1, ~pitchShiftPlaybackBuffer, rate: 1, loop:0, doneAction:2))
 };
 
 Ndef(\pitchShiftAudible, ~pitchShiftGateFunction);
@@ -314,7 +314,7 @@ Ndef(\pitchShiftMethod, { Ndef.ar(\pitchShiftedByDelay, 1) });
 };
 
 ~auditionPlaybackFunction = {
-	PlayBuf.ar(1, ~auditionPlaybackBuffer, rate: 1, loop:0)
+	PlayBuf.ar(1, ~auditionPlaybackBuffer, rate: 1, loop:0, doneAction:2)
 };
 
 Ndef(\audition, ~auditionFunction).playN([0, 1]);
