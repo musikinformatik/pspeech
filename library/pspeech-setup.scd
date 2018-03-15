@@ -46,9 +46,6 @@ Ndef(\shiftRatio, (-200 / 100).midiratio);
 Ndef(\auditionAmp, 0.6);
 Ndef(\onoff_in, 1);
 
-// predelay pitchshift:
-Ndef(\shiftPreDelay, 0);
-
 
 // f0 - Analyse (unsicher!)
 
@@ -72,7 +69,6 @@ Ndef(\graceTimeF0, 1.3);
 		"maximal time between ps-events", Ndef(\trigDistanceMax).source,
 		"pitch shift duration", Ndef(\shiftDur).source,
 		"pitch shift interval (cent)", Ndef(\shiftRatio, (-200 / 100).midiratio).source.ratiomidi.round(0.0001) * 100,
-		"pitchshift predelay", Ndef(\shiftPreDelay).source,
 		"audition amplitude", Ndef(\auditionAmp).source,
 
 	]
@@ -231,8 +227,6 @@ Ndef(\pitchShiftRunning, {
 
 ~pitchShiftGateFunction = {
 	var onoff = Ndef.kr(\pitchShiftRunning, 1);
-	// delay just a little bit, so that pitchshift is already active
-	onoff = DelayL.kr(onoff, 0.1, Ndef.kr(\shiftPreDelay, 1));
 	onoff  = onoff.lagud(0, 0.1); // 100 ms soft fading out pitch shift
 	onoff
 };
