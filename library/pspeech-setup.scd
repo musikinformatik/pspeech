@@ -20,7 +20,7 @@ Parameter
 
 
 // Schwellwert für Analysebeginn
-Ndef(\ampThresh, 0.05);
+Ndef(\ampThresh, 0.02);
 
 // Maximale Verzögerung vor erstem ps-Trigger (in sec)
 Ndef(\trigOnsetDelayMax, 1.0);
