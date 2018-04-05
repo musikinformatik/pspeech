@@ -1,4 +1,4 @@
-~pspeechVersion = "0.1.2";
+~pspeechVersion = "0.1.3";
 
 ~path = "pspeech-setup.scd".resolveRelative;
 ~filePrefix = "pspeech";
