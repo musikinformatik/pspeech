@@ -180,7 +180,7 @@ Ndef(\triggersHappen, { Ndef.kr(\hasFreq, 1) });
 
 
 Ndef(\pitchShiftRunning, {
-	var triggersHappen, triggerPossible, trigOnsetDelayMask, trigOnsetDelay;
+	var triggersHappen, trigger, triggerPossible, trigOnsetDelayMask, trigOnsetDelay;
 	var output, prevOutput, randTrig;
 	var timeSincePrevTriggerOff, delayTime;
 
@@ -203,14 +203,19 @@ Ndef(\pitchShiftRunning, {
 	// and this only after a certain time
 	trigOnsetDelayMask = Sweep.kr(triggersHappen) > trigOnsetDelay;
 
+	triggerPossible = triggersHappen * trigOnsetDelayMask * (1 - prevOutput);
+
 	// goes to 1 when triggers are possible, else 0
-	triggerPossible =  HPZ1.kr(triggersHappen * trigOnsetDelayMask * (1 - prevOutput)) > 0;
+	trigger =  HPZ1.kr(triggerPossible) > 0;
 
 	// when triggers are possible, calculate random delaytime
-	delayTime = TRand.kr(Ndef.kr(\trigDistanceMin, 1), Ndef.kr(\trigDistanceMax, 1), triggerPossible);
+	delayTime = TRand.kr(Ndef.kr(\trigDistanceMin, 1), Ndef.kr(\trigDistanceMax, 1), trigger);
 
 	// ... and delay the trigger signal by this delay time
-	randTrig = TDelay.kr(triggerPossible, delayTime);
+	randTrig = TDelay.kr(trigger, delayTime);
+
+	// but do not trigger after it has become impossible
+	randTrig = randTrig * triggerPossible;
 
 	// actual on-off is eactly shiftDur
 	output = Trig1.kr(randTrig, Ndef.kr(\shiftDur, 1));
