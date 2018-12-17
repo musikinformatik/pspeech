@@ -1,4 +1,5 @@
 
+currentEnvironment.clear;
 
 loadRelative("library/pspeech-setup.scd");
 loadRelative("library/pspeech-commands.scd");
